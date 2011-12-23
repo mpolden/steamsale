@@ -13,6 +13,7 @@ Usage
      -h, --help         Display usage
      -s, --sale         Show only items that are on sale
      -c, --colors       Use colors in output
+     -d, --dump         Dump dictionary
 
 You'll need your Steam ID from the wishlist URL:
 

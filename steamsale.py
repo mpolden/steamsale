@@ -105,7 +105,6 @@ def main():
     steam_id = args[0]
     only_sale = False
     colors = False
-    print opts
     for opt, arg in opts:
         if opt in ('-h', '--help'):
             usage()

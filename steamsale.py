@@ -87,13 +87,14 @@ def usage():
     print ('usage: %s [OPTIONS] steam_id'
     '\n -h, --help\t\tDisplay usage'
     '\n -s, --sale\t\tShow only items that are on sale'
-    '\n -c, --colors\t\tUse colors in output') % sys.argv[0]
+    '\n -c, --colors\t\tUse colors in output'
+    '\n -d, --dump\t\tDump dictionary') % sys.argv[0]
     sys.exit(1)
 
 def main():
     """ Parse argv, find items and print them to stdout """
     try:
-        opts, args = getopt(sys.argv[1:], 'hsc', ['help', 'sale',
+        opts, args = getopt(sys.argv[1:], 'hdsc', ['help', 'dump', 'sale',
                 'colors'])
     except GetoptError, err:
         print str(err)
@@ -105,6 +106,7 @@ def main():
     steam_id = args[0]
     only_sale = False
     colors = False
+    dump = False
     for opt, arg in opts:
         if opt in ('-h', '--help'):
             usage()
@@ -112,10 +114,15 @@ def main():
             only_sale = True
         elif opt in ('-c', '--colors'):
             colors = True
+        elif opt in ('-d', '--dump'):
+            dump = True
 
     wishlist = Wishlist(steam_id)
-    wishlist.find_items(only_sale)
-    print wishlist.prettify(colors)
+    items = wishlist.find_items(only_sale)
+    if dump:
+        print items
+    else:
+        print wishlist.prettify(colors)
 
 if __name__ == '__main__':
     main()

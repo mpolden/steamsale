@@ -4,6 +4,8 @@
 
 import sys
 import requests
+from re import sub
+from getopt import getopt, GetoptError
 from BeautifulSoup import BeautifulSoup
 from termcolor import colored
 
@@ -12,7 +14,7 @@ class Wishlist(object):
     def __init__(self, steam_id):
         url = 'http://steamcommunity.com/profiles/%s/wishlist' % steam_id
         req = requests.get(url)
-        self.soup = BeautifulSoup(req.content, 
+        self.soup = BeautifulSoup(req.content,
                 convertEntities=BeautifulSoup.HTML_ENTITIES)
         self.tag = None
         self.items = []
@@ -37,7 +39,7 @@ class Wishlist(object):
         final_price = self.tag.find(attrs = {'class': 'discount_final_price'})
         return final_price.text if final_price else None
 
-    def find_items(self):
+    def find_items(self, only_sale=False):
         """ Parse and find wishlist items """
         # Find divs containing wishlist items
         item_tags = self.soup.findAll(attrs = {'class': "wishlistRowItem\t"})
@@ -49,6 +51,8 @@ class Wishlist(object):
             original_price = self._find_org_price()
             final_price = self._find_final_price()
 
+            if only_sale and not discount_pct:
+                continue
             self.items.append({
                 'title': title,
                 'discount_pct': discount_pct,
@@ -58,39 +62,61 @@ class Wishlist(object):
 
         return self.items
 
-    def prettify(self):
+    def prettify(self, colors):
         """ Create a string representation of items """
-        out = []
+        lines = []
         for item in self.items:
             if item['discount_pct']:
-                out.append('%s is on sale for %s, down from %s (%s)' % \
+                lines.append('%s is on sale for %s, down from %s (%s)' % \
                         (colored(item['title'], attrs=['bold']),
                                 colored(item['final_price'], 'green'),
                                 colored(item['original_price'], 'red'),
                                 colored(item['discount_pct'], 'cyan')))
             elif item['final_price']:
-                out.append('%s is not on sale and costs %s' % \
-                        (colored(item['title'], attrs=['bold']), 
+                lines.append('%s is not on sale and costs %s' % \
+                        (colored(item['title'], attrs=['bold']),
                                 colored(item['final_price'], 'yellow')))
             else:
-                out.append('%s has no price (yet?)' % colored(item['title'], 
+                lines.append('%s has no price (yet?)' % colored(item['title'],
                         attrs=['bold']))
-        return '\n'.join(out)
+        out = '\n'.join(lines)
+        return out if colors else sub(r'\x1b\[\d+m', '', out) # Hack!
 
 def usage():
     """ Display usage """
-    print 'usage: %s steam_id' % sys.argv[0]
+    print ('usage: %s [OPTIONS] steam_id'
+    '\n -h, --help\t\tDisplay usage'
+    '\n -s, --sale\t\tShow only items that are on sale'
+    '\n -c, --colors\t\tUse colors in output') % sys.argv[0]
+    sys.exit(1)
 
 def main():
     """ Parse argv, find items and print them to stdout """
-    if len(sys.argv) != 2:
+    try:
+        opts, args = getopt(sys.argv[1:], 'hsc', ['help', 'sale',
+                'colors'])
+    except GetoptError, err:
+        print str(err)
         usage()
-        return
-    steam_id = sys.argv[1]
-    
+
+    if not args:
+        usage()
+
+    steam_id = args[0]
+    only_sale = False
+    colors = False
+    print opts
+    for opt, arg in opts:
+        if opt in ('-h', '--help'):
+            usage()
+        elif opt in ('-s', '--sale'):
+            only_sale = True
+        elif opt in ('-c', '--colors'):
+            colors = True
+
     wishlist = Wishlist(steam_id)
-    wishlist.find_items()
-    print wishlist.prettify()
+    wishlist.find_items(only_sale)
+    print wishlist.prettify(colors)
 
 if __name__ == '__main__':
     main()

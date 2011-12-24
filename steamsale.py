@@ -9,6 +9,7 @@ from getopt import getopt, GetoptError
 from BeautifulSoup import BeautifulSoup
 from termcolor import colored
 
+
 class Wishlist(object):
     """ Class representing a Steam wishlist """
     def __init__(self, steam_id):
@@ -21,30 +22,30 @@ class Wishlist(object):
 
     def _find_price(self):
         """ Find default price or None """
-        price = self.tag.find(attrs = {'class': 'price'})
+        price = self.tag.find(attrs={'class': 'price'})
         return price.text if price and price.text else None
 
     def _find_discount_pct(self):
-        """ Returns discount percentage or None """
-        discount_pct = self.tag.find(attrs = {'class': 'discount_pct'})
+        """ Returns discount percentge or None """
+        discount_pct = self.tag.find(attrs={'class': 'discount_pct'})
         return discount_pct.text if discount_pct else None
 
     def _find_org_price(self):
         """ Returns original price or None """
-        org_price = self.tag.find(attrs = {'class': 'discount_original_price'})
+        org_price = self.tag.find(attrs={'class': 'discount_original_price'})
         return org_price.text if org_price else None
 
     def _find_final_price(self):
         """ Returns discounted final price or None """
-        final_price = self.tag.find(attrs = {'class': 'discount_final_price'})
+        final_price = self.tag.find(attrs={'class': 'discount_final_price'})
         return final_price.text if final_price else None
 
     def find_items(self, only_sale=False):
         """ Parse and find wishlist items """
         # Find divs containing wishlist items
-        item_tags = self.soup.findAll(attrs = {'class': "wishlistRowItem\t"})
+        item_tags = self.soup.findAll(attrs={'class': "wishlistRowItem\t"})
         for item_tag in item_tags:
-            self.tag = item_tag.find(attrs = {'class': 'gameListPriceData'})
+            self.tag = item_tag.find(attrs={'class': 'gameListPriceData'})
             title = item_tag.find('h4').text
             default_price = self._find_price()
             discount_pct = self._find_discount_pct()
@@ -80,7 +81,8 @@ class Wishlist(object):
                 lines.append('%s has no price (yet?)' % colored(item['title'],
                         attrs=['bold']))
         out = '\n'.join(lines)
-        return out if colors else sub(r'\x1b\[\d+m', '', out) # Hack!
+        return out if colors else sub(r'\x1b\[\d+m', '', out)  # Hack!
+
 
 def usage():
     """ Display usage """
@@ -90,6 +92,7 @@ def usage():
     '\n -c, --colors\t\tUse colors in output'
     '\n -d, --dump\t\tDump dictionary') % sys.argv[0]
     sys.exit(1)
+
 
 def main():
     """ Parse argv, find items and print them to stdout """

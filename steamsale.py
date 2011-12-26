@@ -4,7 +4,9 @@
 
 import sys
 import requests
-from re import sub
+import yaml
+import os.path
+from re import sub, search
 from getopt import getopt, GetoptError
 from BeautifulSoup import BeautifulSoup
 from termcolor import colored
@@ -26,7 +28,7 @@ class Wishlist(object):
         return price.text if price and price.text else None
 
     def _find_discount_pct(self):
-        """ Returns discount percentge or None """
+        """ Returns discount percentage or None """
         discount_pct = self.tag.find(attrs={'class': 'discount_pct'})
         return discount_pct.text if discount_pct else None
 
@@ -40,6 +42,11 @@ class Wishlist(object):
         final_price = self.tag.find(attrs={'class': 'discount_final_price'})
         return final_price.text if final_price else None
 
+    def _find_url(self):
+        """ Returns game URL or None """
+        url = self.tag.find(attrs={'class': 'btn_visit_store'})
+        return url.attrMap['href'] if url and 'href' in url.attrMap else None
+
     def find_items(self, only_sale=False):
         """ Parse and find wishlist items """
         # Find divs containing wishlist items
@@ -47,6 +54,8 @@ class Wishlist(object):
         for item_tag in item_tags:
             self.tag = item_tag.find(attrs={'class': 'gameListPriceData'})
             title = item_tag.find('h4').text
+            url = self._find_url()
+            app_id = search(r'\d+/?$', url).group(0)
             default_price = self._find_price()
             discount_pct = self._find_discount_pct()
             original_price = self._find_org_price()
@@ -55,6 +64,8 @@ class Wishlist(object):
             if only_sale and not discount_pct:
                 continue
             self.items.append({
+                'app_id': app_id,
+                'url': url,
                 'title': title,
                 'discount_pct': discount_pct,
                 'original_price': original_price,

@@ -68,13 +68,13 @@ class Wishlist(object):
                 continue
 
             if percent_off > 0:
-              if not discount_pct:
-                continue
+                if not discount_pct:
+                    continue
 
-              discount_amount = int(
-                  discount_pct.replace('-','').replace('%',''))
-              if discount_amount < percent_off:
-                continue
+                discount_amount = int(
+                    discount_pct.replace('-', '').replace('%', ''))
+                if discount_amount < percent_off:
+                    continue
 
             self.items.append({
                 'app_id': app_id,
@@ -143,9 +143,9 @@ def main():
             only_sale = True
         elif opt in ('-p', '--pct_off'):
             if not arg.isdigit() or int(arg) < 1 or int(arg) > 99:
-              print "--pct_off value must be a number between 1 and 99"
-              usage()
-            percent_off = int(arg)
+                print "--pct_off value must be a number between 1 and 99"
+                usage()
+                percent_off = int(arg)
         elif opt in ('-c', '--colors'):
             colors = True
         elif opt in ('-d', '--dump'):

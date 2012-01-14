@@ -12,7 +12,7 @@ from termcolor import colored
 class Wishlist(object):
     """ Class representing a Steam wishlist """
     def __init__(self, steam_id):
-        url = 'http://steamcommunity.com/profiles/%s/wishlist' % steam_id
+        url = 'http://steamcommunity.com/id/%s/wishlist' % steam_id
         req = requests.get(url)
         self.soup = BeautifulSoup(req.content,
                 convertEntities=BeautifulSoup.HTML_ENTITIES)

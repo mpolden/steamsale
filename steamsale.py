@@ -39,7 +39,7 @@ class Wishlist(object):
         final_price = self.tag.find(attrs = {'class': 'discount_final_price'})
         return final_price.text if final_price else None
 
-    def find_items(self, only_sale=False):
+    def find_items(self, only_sale=False, percent_off=0):
         """ Parse and find wishlist items """
         # Find divs containing wishlist items
         item_tags = self.soup.findAll(attrs = {'class': "wishlistRowItem\t"})
@@ -53,6 +53,16 @@ class Wishlist(object):
 
             if only_sale and not discount_pct:
                 continue
+
+            if percent_off > 0:
+              if not discount_pct:
+                continue
+
+              discount_amount = int(
+                  discount_pct.replace('-','').replace('%',''))
+              if discount_amount < percent_off:
+                continue
+
             self.items.append({
                 'title': title,
                 'discount_pct': discount_pct,
@@ -87,6 +97,7 @@ def usage():
     print ('usage: %s [OPTIONS] steam_id'
     '\n -h, --help\t\tDisplay usage'
     '\n -s, --sale\t\tShow only items that are on sale'
+    '\n -p, --pct_off NUM\tShow sale items with this discount or greater'
     '\n -c, --colors\t\tUse colors in output'
     '\n -d, --dump\t\tDump dictionary') % sys.argv[0]
     sys.exit(1)
@@ -94,8 +105,8 @@ def usage():
 def main():
     """ Parse argv, find items and print them to stdout """
     try:
-        opts, args = getopt(sys.argv[1:], 'hdsc', ['help', 'dump', 'sale',
-                'colors'])
+        opts, args = getopt(sys.argv[1:], 'hdsp:c', ['help', 'dump', 'sale',
+                'percent_off=', 'colors'])
     except GetoptError, err:
         print str(err)
         usage()
@@ -105,6 +116,7 @@ def main():
 
     steam_id = args[0]
     only_sale = False
+    percent_off = 0
     colors = False
     dump = False
     for opt, arg in opts:
@@ -112,13 +124,19 @@ def main():
             usage()
         elif opt in ('-s', '--sale'):
             only_sale = True
+        elif opt in ('-p', '--pct_off'):
+            if not arg.isdigit() or int(arg) < 1 or int(arg) > 99:
+              print "--pct_off value must be a number between 1 and 99"
+              usage()
+              return
+            percent_off = int(arg)
         elif opt in ('-c', '--colors'):
             colors = True
         elif opt in ('-d', '--dump'):
             dump = True
 
     wishlist = Wishlist(steam_id)
-    items = wishlist.find_items(only_sale)
+    items = wishlist.find_items(only_sale, percent_off)
     if dump:
         print items
     else:

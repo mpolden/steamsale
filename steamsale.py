@@ -109,7 +109,7 @@ def main():
     """ Parse argv, find items and print them to stdout """
     try:
         opts, args = getopt(sys.argv[1:], 'hdsp:c', ['help', 'dump', 'sale',
-                'percent_off=', 'colors'])
+                'pct_off=', 'colors'])
     except GetoptError, err:
         print str(err)
         usage()
@@ -131,7 +131,6 @@ def main():
             if not arg.isdigit() or int(arg) < 1 or int(arg) > 99:
               print "--pct_off value must be a number between 1 and 99"
               usage()
-              return
             percent_off = int(arg)
         elif opt in ('-c', '--colors'):
             colors = True

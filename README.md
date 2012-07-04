@@ -25,11 +25,13 @@ Dependencies
 * requests - http://docs.python-requests.org
 * BeautifulSoup - http://www.crummy.com/software/BeautifulSoup
 * termcolor - http://pypi.python.org/pypi/termcolor
+* PyYAML - http://pyyaml.org/wiki/PyYAML
 
-All of them can be installed through pip
+Create and initialize virtualenv:
 
-    pip install requests BeautifulSoup termcolor
+    virtualenv --distribute venv
+    source venv/bin/activate
 
-..some of them are in apt too, if that's your thing
+Install dependencies:
 
-    aptitude install python-requests python-beautifulsoup
+    pip install -r requirements.txt

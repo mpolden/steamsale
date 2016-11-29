@@ -1,4 +1,4 @@
-BeautifulSoup==3.2.1
+beautifulsoup4==4.5.1
 PyYAML==3.10
 requests==0.13.2
 termcolor==1.1.0

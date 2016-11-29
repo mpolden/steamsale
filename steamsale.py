@@ -2,26 +2,24 @@
 
 """ A script that parses your Steam wishlist and finds discounts """
 
+from __future__ import print_function
+from __future__ import unicode_literals
 import sys
 import requests
-import yaml
-import os.path
 from re import sub, search
 from getopt import getopt, GetoptError
-from BeautifulSoup import BeautifulSoup
+from bs4 import BeautifulSoup
 from termcolor import colored
-
 
 class Wishlist(object):
     """ Class representing a Steam wishlist """
     def __init__(self, steam_id):
         if steam_id.isdigit():
-            url = 'http://steamcommunity.com/profiles/%s/wishlist' % steam_id
+            url = 'http://steamcommunity.com/profiles/{}/wishlist'.format(steam_id)
         else:
-            url = 'http://steamcommunity.com/id/%s/wishlist' % steam_id
+            url = 'http://steamcommunity.com/id/{}/wishlist'.format(steam_id)
         req = requests.get(url)
-        self.soup = BeautifulSoup(req.content,
-                convertEntities=BeautifulSoup.HTML_ENTITIES)
+        self.soup = BeautifulSoup(req.content, 'lxml')
         self.tag = None
         self.items = []
 
@@ -53,12 +51,12 @@ class Wishlist(object):
     def find_items(self, only_sale=False, percent_off=0):
         """ Parse and find wishlist items """
         # Find divs containing wishlist items
-        item_tags = self.soup.findAll(attrs={'class': "wishlistRowItem\t"})
+        item_tags = self.soup.findAll(attrs={'class': "wishlistRow"})
         for item_tag in item_tags:
             self.tag = item_tag.find(attrs={'class': 'gameListPriceData'})
             title = item_tag.find('h4').text
             url = self._find_url()
-            app_id = search(r'\d+/?$', url).group(0)
+            app_id = item_tag['id'].split('_')[1]
             default_price = self._find_price()
             discount_pct = self._find_discount_pct()
             original_price = self._find_org_price()
@@ -92,30 +90,28 @@ class Wishlist(object):
         lines = []
         for item in self.items:
             if item['discount_pct']:
-                lines.append('%s is on sale for %s, down from %s (%s)' % \
-                        (colored(item['title'], attrs=['bold']),
+                lines.append('{} is on sale for {}, down from {} ({})'.format(colored(item['title'], attrs=['bold']),
                                 colored(item['final_price'], 'green'),
                                 colored(item['original_price'], 'red'),
                                 colored(item['discount_pct'], 'cyan')))
             elif item['final_price']:
-                lines.append('%s is not on sale and costs %s' % \
-                        (colored(item['title'], attrs=['bold']),
-                                colored(item['final_price'], 'yellow')))
+                name = colored(item['title'], attrs=['bold'])
+                price = colored(item['final_price'].strip(), 'yellow')
+                lines.append('{} is not on sale and costs {}'.format(name, price))
             else:
-                lines.append('%s has no price (yet?)' % colored(item['title'],
-                        attrs=['bold']))
+                lines.append('{} has no price (yet?)'.format(colored(item['title'], attrs=['bold'])))
         out = '\n'.join(lines)
         return out if colors else sub(r'\x1b\[\d+m', '', out)  # Hack!
 
 
 def usage():
     """ Display usage """
-    print ('usage: %s [OPTIONS] steam_id'
-    '\n -h, --help\t\tDisplay usage'
-    '\n -s, --sale\t\tShow only items that are on sale'
-    '\n -p, --pct_off NUM\tShow sale items with this discount or greater'
-    '\n -c, --colors\t\tUse colors in output'
-    '\n -d, --dump\t\tDump dictionary') % sys.argv[0]
+    print('usage: {} [OPTIONS] steam_id'\
+        '\n -h, --help\t\tDisplay usage'\
+        '\n -s, --sale\t\tShow only items that are on sale'\
+        '\n -p, --pct_off NUM\tShow sale items with this discount or greater'\
+        '\n -c, --colors\t\tUse colors in output'\
+        '\n -d, --dump\t\tDump dictionary'.format(sys.argv[0]))
     sys.exit(1)
 
 
@@ -124,10 +120,9 @@ def main():
     try:
         opts, args = getopt(sys.argv[1:], 'hdsp:c', ['help', 'dump', 'sale',
                 'pct_off=', 'colors'])
-    except GetoptError, err:
-        print str(err)
+    except (GetoptError, err):
+        print(str(err))
         usage()
-
     if not args:
         usage()
 
@@ -143,7 +138,7 @@ def main():
             only_sale = True
         elif opt in ('-p', '--pct_off'):
             if not arg.isdigit() or int(arg) < 1 or int(arg) > 99:
-                print "--pct_off value must be a number between 1 and 99"
+                print("--pct_off value must be a number between 1 and 99")
                 usage()
                 percent_off = int(arg)
         elif opt in ('-c', '--colors'):
@@ -154,9 +149,9 @@ def main():
     wishlist = Wishlist(steam_id)
     items = wishlist.find_items(only_sale, percent_off)
     if dump:
-        print items
+        print(items)
     else:
-        print wishlist.prettify(colors)
+        print(wishlist.prettify(colors))
 
 if __name__ == '__main__':
     main()

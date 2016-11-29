@@ -19,7 +19,7 @@ class Wishlist(object):
         else:
             url = 'http://steamcommunity.com/id/{}/wishlist'.format(steam_id)
         req = requests.get(url)
-        self.soup = BeautifulSoup(req.content, 'lxml')
+        self.soup = BeautifulSoup(req.content, 'html.parser')
         self.tag = None
         self.items = []
 

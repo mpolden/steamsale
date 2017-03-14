@@ -1,6 +1,6 @@
 # steamsale
 
-[![Build Status](https://travis-ci.org/martinp/steamsale.svg?branch=master)](https://travis-ci.org/martinp/steamsale)
+[![Build Status](https://travis-ci.org/mpolden/steamsale.svg?branch=master)](https://travis-ci.org/mpolden/steamsale)
 
 A Python script for retrieving your Steam wishlist.
 

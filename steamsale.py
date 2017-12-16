@@ -7,6 +7,7 @@ from __future__ import unicode_literals
 import sys
 import requests
 from re import sub
+from pprint import pprint
 from getopt import getopt, GetoptError
 from bs4 import BeautifulSoup
 from termcolor import colored
@@ -158,7 +159,7 @@ def main():
     wishlist = Wishlist(steam_id)
     items = wishlist.find_items(only_sale, percent_off)
     if dump:
-        print(items)
+        pprint(items)
     else:
         print(wishlist.prettify(colors))
 

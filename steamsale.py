@@ -29,22 +29,22 @@ class Wishlist(object):
     def _find_price(self):
         """Find default price or None"""
         price = self.tag.find(attrs={'class': 'price'})
-        return price.text if price and price.text else None
+        return price.text.strip() if price and price.text else None
 
     def _find_discount_pct(self):
         """Returns discount percentage or None"""
         discount_pct = self.tag.find(attrs={'class': 'discount_pct'})
-        return discount_pct.text if discount_pct else None
+        return discount_pct.text.strip() if discount_pct else None
 
     def _find_org_price(self):
         """Returns original price or None"""
         org_price = self.tag.find(attrs={'class': 'discount_original_price'})
-        return org_price.text if org_price else None
+        return org_price.text.strip() if org_price else None
 
     def _find_final_price(self):
         """Returns discounted final price or None"""
         final_price = self.tag.find(attrs={'class': 'discount_final_price'})
-        return final_price.text if final_price else None
+        return final_price.text.strip() if final_price else None
 
     def _find_url(self):
         """Returns game URL or None"""

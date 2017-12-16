@@ -48,8 +48,10 @@ class Wishlist(object):
 
     def _find_url(self):
         """Returns game URL or None"""
-        url = self.tag.find(attrs={'class': 'btn_visit_store'})
-        return url.attrMap['href'] if url and 'href' in url.attrMap else None
+        a = self.tag.find('a')
+        if a is not None:
+            return a.get('href', None)
+        return None
 
     def find_items(self, only_sale=False, percent_off=0):
         """Parse and find wishlist items"""
